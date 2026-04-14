@@ -1,0 +1,12 @@
+[project]
+name = "co-captain-git-agent"
+version = "0.1.0"
+description = "Human liaison agent for the SuperInstance fleet"
+requires-python = ">=3.10"
+dependencies = ["pyyaml"]
+
+[project.scripts]
+co-captain = "cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
