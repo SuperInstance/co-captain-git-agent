@@ -1,3 +1,10 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["cli", "co_captain", "dispatcher", "fleet_manager", "human_interface"]
+
 [project]
 name = "co-captain-git-agent"
 version = "0.1.0"
