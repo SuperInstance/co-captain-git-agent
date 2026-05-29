@@ -1,8 +1,15 @@
 # Co-Captain Git-Agent
 
-> **The human's liaison to the SuperInstance fleet.**
+> The human operator's liaison to the SuperInstance fleet — receives instructions, translates intent to fleet protocol, dispatches work, monitors progress, and gates everything through human approval.
 
-The Co-Captain is NOT another worker agent. It's the human operator's representative inside the SuperInstance. It acts as the single point of contact between a human operator and the entire fleet of git-agents.
+## What This Gives You
+
+- **Single point of contact** — One agent represents the human to the entire fleet
+- **Fleet dispatch** — Route tasks to appropriate git-agents based on capabilities
+- **State machine** — STANDBY → BRIEFED → DISPATCHING → MONITORING → REPORTING cycle
+- **Fleet management** — Onboard/offboard agents, assign capabilities
+- **Human context** — Preferences, priorities, working hours, escalation thresholds
+- **Gatekeeper** — Nothing reaches the fleet without co-captain approval
 
 ## Architecture
 
@@ -25,24 +32,6 @@ The Co-Captain is NOT another worker agent. It's the human operator's representa
      │
      │  Status reports, escalations, summaries
      └──────────────────────────────────────────────────
-```
-
-## Responsibilities
-
-1. **Receive Instructions** — via CLI, chat, or API
-2. **Translate** human intent → fleet protocol messages
-3. **Dispatch** work to appropriate git-agents
-4. **Monitor** progress and report back
-5. **Manage Fleet** membership (onboard/offboard agents)
-6. **Hold Human Context** — preferences, priorities, working hours
-7. **Gatekeeper** — nothing reaches the fleet without co-captain approval
-
-## State Machine
-
-```
-STANDBY ──▶ BRIEFED ──▶ DISPATCHING ──▶ MONITORING ──▶ REPORTING
-   ▲                                                       │
-   └───────────────────────────────────────────────────────┘
 ```
 
 ## Quick Start
@@ -72,22 +61,58 @@ co-captain config working-hours 9 17
 co-captain config threshold CRITICAL
 ```
 
-## Modules
+## API Reference
+
+### CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `co-captain status` | Current fleet status |
+| `co-captain fleet add <agent> <caps>` | Register an agent with capabilities |
+| `co-captain fleet remove <agent>` | Remove an agent |
+| `co-captain brief <description>` | Create a briefing |
+| `co-captain dispatch <task>` | Dispatch task to fleet |
+| `co-captain summary` | Activity summary |
+| `co-captain config <key> <value>` | Set preferences |
+
+### Modules
 
 | Module | Purpose |
 |--------|---------|
 | `co_captain.py` | Core agent with state machine |
 | `dispatcher.py` | Task dispatch and routing |
-| `fleet_manager.py` | Fleet membership and capabilities |
-| `human_interface.py` | Human communication formatting |
-| `cli.py` | Command-line interface |
+| `fleet_manager.py` | Fleet membership management |
+| `human_interface.py` | Human input/output handling |
 
-## Running Tests
+## How It Fits
+
+- **[fleet-cicd-agent](https://github.com/SuperInstance/fleet-cicd-agent)** — CI/CD tasks dispatched through co-captain
+- **[cocapn-health-rs](https://github.com/SuperInstance/cocapn-health-rs)** — Health status fed back to co-captain for escalation decisions
+- **[clark-agent](https://github.com/SuperInstance/clark-agent)** — The agent loop framework co-captain is built on
+- **[commit-predictor](https://github.com/SuperInstance/commit-predictor)** — Predictions inform dispatch timing
+- **[ccc-os](https://github.com/SuperInstance/ccc-os)** — Fleet monitoring data flows through co-captain
+
+## Testing
+
+398 tests covering state machine transitions, fleet management, dispatch routing, human interface, and CLI commands.
 
 ```bash
-python -m pytest tests/ -v
+pip install -e ".[dev]"
+pytest
 ```
+
+## Installation
+
+```bash
+git clone https://github.com/SuperInstance/co-captain-git-agent.git
+cd co-captain-git-agent
+pip install -e .
+```
+
+Requires Python 3.11+.
 
 ## License
 
 MIT
+
+Part of the [SuperInstance OpenConstruct](https://github.com/SuperInstance) ecosystem.
