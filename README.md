@@ -1,118 +1,84 @@
-# Co-Captain Git-Agent
+# Co-Captain Git-Agent — Human Liaison to the Fleet
 
-> The human operator's liaison to the SuperInstance fleet — receives instructions, translates intent to fleet protocol, dispatches work, monitors progress, and gates everything through human approval.
+**The human operator's representative inside the SuperInstance fleet. Receives instructions, dispatches work, monitors progress, gates everything through human approval.**
 
 ## What This Gives You
 
-- **Single point of contact** — One agent represents the human to the entire fleet
-- **Fleet dispatch** — Route tasks to appropriate git-agents based on capabilities
-- **State machine** — STANDBY → BRIEFED → DISPATCHING → MONITORING → REPORTING cycle
-- **Fleet management** — Onboard/offboard agents, assign capabilities
-- **Human context** — Preferences, priorities, working hours, escalation thresholds
-- **Gatekeeper** — Nothing reaches the fleet without co-captain approval
-
-## Architecture
-
-```
-┌──────────┐     ┌─────────────────┐     ┌──────────────────┐
-│          │     │   Co-Captain    │     │  Fleet Protocol  │
-│  Human   │────▶│  Git-Agent      │────▶│  Messages        │────┐
-│ Operator │     │                 │     │                  │    │
-│          │◀────│                 │◀────│                  │◀───┘
-└──────────┘     └─────────────────┘     └──────────────────┘
-     ▲                    │                        │
-     │                    ▼                        ▼
-     │           ┌──────────────────────────────────────┐
-     │           │           SuperInstance Fleet        │
-     │           │  ┌──────────┐ ┌──────────┐          │
-     │           │  │ git-agent│ │ git-agent│  ...     │
-     │           │  │   #1     │ │   #2     │          │
-     │           │  └──────────┘ └──────────┘          │
-     │           └──────────────────────────────────────┘
-     │
-     │  Status reports, escalations, summaries
-     └──────────────────────────────────────────────────
-```
+- **Human-first state machine** — STANDBY → BRIEFED → DISPATCHING → MONITORING → REPORTING cycle
+- **Intent translation** — converts natural-language instructions into fleet protocol messages
+- **Task dispatching** — routes work to appropriate git-agents with priority levels
+- **Fleet management** — tracks available agents, capabilities, and current assignments
+- **Human gating** — nothing executes without explicit human approval
+- **Progress reporting** — real-time status updates back to the human operator
 
 ## Quick Start
 
 ```bash
-pip install -e .
+pip install co-captain-git-agent
+```
 
-# Add agents to your fleet
-co-captain fleet add agent-dev code_review,testing
-co-captain fleet add agent-ops deployment,monitoring
+```python
+from co_captain import CoCaptain
+from human_interface import HumanInterface, HumanContext
 
-# Check fleet status
-co-captain status
+# Create a co-captain with human context
+captain = CoCaptain(human=HumanContext(name="operator", role="admin"))
 
-# Dispatch a task
-co-captain dispatch "Run tests on the main branch"
+# Brief the co-captain with an instruction
+captain.brief("Audit all fleet READMEs and push world-class rewrites")
 
-# Or brief first, then dispatch
-co-captain brief "Refactor the auth module" --priority HIGH --agents agent-dev
+# The co-captain translates this into fleet tasks
+# STANDBY → BRIEFED → DISPATCHING → MONITORING → REPORTING
 
-# Get a summary
-co-captain summary
-
-# Configure preferences
-co-captain config name "Jane Doe"
-co-captain config working-hours 9 17
-co-captain config threshold CRITICAL
+# Check status
+report = captain.report()
+print(f"Tasks dispatched: {report.tasks_dispatched}")
+print(f"Tasks completed: {report.tasks_completed}")
+print(f"Pending approval: {report.pending_approval}")
 ```
 
 ## API Reference
 
-### CLI Commands
+### `CoCaptain(human, fleet_manager=None)`
+State machine that mediates between humans and the fleet.
 
-| Command | Description |
-|---------|-------------|
-| `co-captain status` | Current fleet status |
-| `co-captain fleet add <agent> <caps>` | Register an agent with capabilities |
-| `co-captain fleet remove <agent>` | Remove an agent |
-| `co-captain brief <description>` | Create a briefing |
-| `co-captain dispatch <task>` | Dispatch task to fleet |
-| `co-captain summary` | Activity summary |
-| `co-captain config <key> <value>` | Set preferences |
+| Method | Description |
+|--------|-------------|
+| `brief(instruction)` | Translate instruction into fleet tasks |
+| `dispatch()` | Send approved tasks to fleet agents |
+| `monitor()` | Check progress on dispatched tasks |
+| `report()` | Generate status report for human |
+| `approve(task_id)` | Gate a task for execution |
+| `reject(task_id, reason)` | Block a task with explanation |
 
-### Modules
+### `HumanInterface` / `HumanContext`
+Captures operator identity, preferences, and approval state.
 
-| Module | Purpose |
-|--------|---------|
-| `co_captain.py` | Core agent with state machine |
-| `dispatcher.py` | Task dispatch and routing |
-| `fleet_manager.py` | Fleet membership management |
-| `human_interface.py` | Human input/output handling |
+### `Dispatcher`
+Routes fleet messages with `TaskPriority` (LOW, NORMAL, HIGH, URGENT).
+
+### `FleetManager`
+Tracks fleet composition, agent capabilities, and current assignments.
 
 ## How It Fits
 
-- **[fleet-cicd-agent](https://github.com/SuperInstance/fleet-cicd-agent)** — CI/CD tasks dispatched through co-captain
-- **[cocapn-health-rs](https://github.com/SuperInstance/cocapn-health-rs)** — Health status fed back to co-captain for escalation decisions
-- **[clark-agent](https://github.com/SuperInstance/clark-agent)** — The agent loop framework co-captain is built on
-- **[commit-predictor](https://github.com/SuperInstance/commit-predictor)** — Predictions inform dispatch timing
-- **[ccc-os](https://github.com/SuperInstance/ccc-os)** — Fleet monitoring data flows through co-captain
+The human-facing interface of the [SuperInstance fleet](https://github.com/SuperInstance). The Co-Captain is *not* a worker agent — it's the human's proxy.
+
+- **[captain](https://github.com/SuperInstance/captain)** — Fleet commanding vessel (receives dispatched work)
+- **[cocapn-com](https://github.com/SuperInstance/cocapn-com)** — Message routing
+- **[cicd-agent](https://github.com/SuperInstance/cicd-agent)** — CI/CD pipeline (executes dispatched tasks)
+- **[agent-forge](https://github.com/SuperInstance/agent-forge)** — Universal git-agent framework
 
 ## Testing
 
-398 tests covering state machine transitions, fleet management, dispatch routing, human interface, and CLI commands.
-
 ```bash
-pip install -e ".[dev]"
-pytest
+pytest tests/
 ```
 
 ## Installation
 
 ```bash
-git clone https://github.com/SuperInstance/co-captain-git-agent.git
-cd co-captain-git-agent
-pip install -e .
+pip install co-captain-git-agent
 ```
 
-Requires Python 3.11+.
-
-## License
-
-MIT
-
-Part of the [SuperInstance OpenConstruct](https://github.com/SuperInstance) ecosystem.
+Python 3.10+. MIT license.
